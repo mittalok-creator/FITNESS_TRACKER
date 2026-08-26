@@ -1,4 +1,4 @@
-// FitTrack — offline-first PWA. All data lives in localStorage + IndexedDB (photos). No backend required.
+// Alok's Tracker App — offline-first PWA. All data lives in localStorage + IndexedDB (photos). No backend required.
 
 const STORAGE_KEY = "fittrack:v1";
 let state = null;
@@ -52,16 +52,21 @@ function youtubeSearchUrl(exerciseName) {
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(exerciseName + " exercise proper form tutorial");
 }
 function goTo(view, sub) { if (sub) progressSubTab = sub; setView(view); }
+function cardLinkOpen(view, sub, extraClass) {
+  const nav = `goTo('${view}'${sub ? `,'${sub}'` : ""})`;
+  return `<div class="card stat card-link${extraClass ? " " + extraClass : ""}" onclick="${nav}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${nav};}">${icon("chevronRight", 16, "card-chevron")}`;
+}
 
 // ---------- date helpers ----------
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(iso) {
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+  const [y, m, d] = iso.split("-");
+  const weekday = new Date(iso + "T00:00:00").toLocaleDateString(undefined, { weekday: "short" });
+  return `${weekday}, ${d}-${m}-${y}`;
 }
 function fmtDateShort(iso) {
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
+  const [, m, d] = iso.split("-");
+  return `${d}-${m}`;
 }
 function dayIndexOf(iso) { return new Date(iso + "T00:00:00").getDay(); }
 function daysAgoISO(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }
@@ -408,14 +413,14 @@ function renderHome() {
       <div class="quote-text">&ldquo;${quote}&rdquo;</div>
     </div>
 
-    <div class="card hero">
+    <div class="card hero card-link" onclick="goToWorkout()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToWorkout();}">
       <div class="hero-row">
         <div>
           <div class="eyebrow">Today's Program &middot; Week ${weekNumberOf(todayISO())}</div>
           <h2>${icon(prog.rest ? "moon" : "dumbbell", 22)} ${prog.label}</h2>
           <div class="muted">${prog.sub}</div>
         </div>
-        <button class="btn primary" onclick="goToWorkout()">Open Workout</button>
+        <button class="btn primary" onclick="event.stopPropagation();goToWorkout()">Open Workout</button>
       </div>
     </div>
 
@@ -430,59 +435,59 @@ function renderHome() {
     </div>`}
 
     <div class="grid2">
-      <div class="card stat">
+      ${cardLinkOpen("progress", "weight")}
         <div class="eyebrow">Weight</div>
         <div class="stat-num">${curW.toFixed(1)} <span class="unit">kg</span> ${trendBadge(weightDelta, "kg")}</div>
         <div class="muted">Goal ${goalW} kg &middot; ${(curW - goalW).toFixed(1)} kg to go</div>
         <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
         ${weightSeries.length >= 2 ? `<canvas id="weightSpark" height="32" class="sparkline"></canvas>` : ""}
       </div>
-      <div class="card stat">
+      ${cardLinkOpen(heightCm ? "progress" : "settings", heightCm ? "weight" : null)}
         <div class="eyebrow">BMI</div>
         ${bmiNow != null ? `
           <div class="stat-num">${bmiNow} ${trendBadge(bmiDelta)}</div>
           <div class="muted">${bmiCategory(bmiNow)}</div>
           ${bmiSeries.length >= 2 ? `<canvas id="bmiSpark" height="32" class="sparkline"></canvas>` : ""}
-        ` : `<div class="muted">Add your height in Settings to track BMI</div><button class="btn small" onclick="goTo('settings')">Add height</button>`}
+        ` : `<div class="muted">Add your height in Settings to track BMI</div>`}
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("progress", "body")}
         <div class="eyebrow">Abdomen</div>
         ${lastB && lastB.abdomen != null ? `
           <div class="stat-num">${lastB.abdomen} <span class="unit">in</span> ${trendBadge(abdDelta, "in")}</div>
           <div class="muted">Since ${fmtDateShort(firstB.date)}</div>
           ${abdSeries.length >= 2 ? `<canvas id="abdomenSpark" height="32" class="sparkline"></canvas>` : ""}
-        ` : `<div class="muted">Log a body measurement to see this</div><button class="btn small" onclick="goTo('progress','body')">Add measurement</button>`}
+        ` : `<div class="muted">Log a body measurement to see this</div>`}
       </div>
-      <div class="card stat">
+      ${cardLinkOpen(heightCm ? "progress" : "settings", heightCm ? "weight" : null)}
         <div class="eyebrow">Ideal Weight</div>
         ${ideal != null ? `
           <div class="stat-num">${ideal} <span class="unit">kg</span></div>
           <div class="muted">${curW > ideal ? `${(curW - ideal).toFixed(1)} kg to reach ideal` : curW < ideal ? `${(ideal - curW).toFixed(1)} kg below ideal` : "You're at your ideal weight"}</div>
           <div class="muted small">Your goal (${goalW} kg) is ${Math.abs(goalW - ideal).toFixed(1)} kg ${goalW > ideal ? "above" : goalW < ideal ? "below" : "equal to"} the calculated ideal</div>
-        ` : `<div class="muted">Add your height in Settings to see this</div><button class="btn small" onclick="goTo('settings')">Add height</button>`}
+        ` : `<div class="muted">Add your height in Settings to see this</div>`}
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("progress", "body")}
         <div class="eyebrow">Total Inches Lost</div>
         <div class="stat-num">${inchesLost != null ? inchesLost.toFixed(1) : "0.0"} <span class="unit">in</span></div>
         <div class="muted">Across abdomen, waist, hips, chest, arms, thighs &amp; calf</div>
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("progress", "steps")}
         <div class="eyebrow">Steps Yesterday</div>
         <div class="stat-num">${stepYesterday ? stepYesterday.steps.toLocaleString() : "—"} <span class="unit">/ ${stepGoal.toLocaleString()}</span></div>
         <div class="muted">${stepYesterday ? "" : "Not logged yet &middot; "}7-day avg: ${stepWeek.length ? Math.round(avg(stepWeek)).toLocaleString() : "—"}</div>
         <div class="progress"><div class="progress-fill" style="width:${stepYesterday ? Math.min(100, Math.round(stepYesterday.steps / stepGoal * 100)) : 0}%"></div></div>
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("diet")}
         <div class="eyebrow">Diet Today</div>
         <div class="stat-num">${dietPct != null ? dietPct + "%" : "—"}</div>
         <div class="muted">${dietPct != null ? `${doneDietItems}/${totalDietItems} items logged` : "Not logged yet"}</div>
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("progress", "weight")}
         <div class="eyebrow">7-Day Avg Weight</div>
         <div class="stat-num">${wk7.length ? avg(wk7).toFixed(2) : "—"} <span class="unit">kg</span></div>
         <div class="muted">${wk7.length} entr${wk7.length === 1 ? "y" : "ies"} this week</div>
       </div>
-      <div class="card stat">
+      ${cardLinkOpen("progress", "summary")}
         <div class="eyebrow">Logging Streak</div>
         <div class="stat-num">${currentStreak()} <span class="unit">days</span></div>
         <div class="muted">${logStats.skipped} day${logStats.skipped === 1 ? "" : "s"} skipped since ${fmtDateShort(state.profile.programStartDate)} &middot; ${logStats.logged}/${logStats.total} logged</div>
@@ -499,7 +504,8 @@ function renderHome() {
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card-link" onclick="goTo('diet')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('diet');}">
+      ${icon("chevronRight", 16, "card-chevron")}
       <div class="eyebrow">Weekly Goal</div>
       <div class="muted">${icon("droplet", 16)} Drink 3–4 litres of water every day. Everything is measured uncooked.</div>
     </div>
@@ -1291,7 +1297,7 @@ async function generateCollage(dateISO) {
   ctx.fillText(fmtDate(dateISO), pad, 102);
   ctx.globalAlpha = 0.85;
   ctx.font = "500 18px -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText((state.profile.name || "FitTrack") + " · FitTrack", pad, 134);
+  ctx.fillText((state.profile.name || "Alok's Tracker App") + " · Alok's Tracker App", pad, 134);
   ctx.globalAlpha = 1;
 
   const positions = [
@@ -1321,7 +1327,7 @@ async function generateCollage(dateISO) {
   });
 
   ctx.fillStyle = "#5c6f6a"; ctx.font = "500 16px sans-serif"; ctx.textAlign = "center";
-  ctx.fillText("Generated with FitTrack — private progress tracker", W / 2, H - 24);
+  ctx.fillText("Generated with Alok's Tracker App — private progress tracker", W / 2, H - 24);
   ctx.textAlign = "left";
   return canvas;
 }
@@ -1348,7 +1354,7 @@ async function generateBeforeAfter(aId, bId) {
   ctx.fillText("Before & After", W / 2, 62);
   ctx.globalAlpha = 0.9;
   ctx.font = "500 20px -apple-system, Segoe UI, Roboto, sans-serif";
-  ctx.fillText((state.profile.name || "FitTrack") + " · FitTrack", W / 2, 94);
+  ctx.fillText((state.profile.name || "Alok's Tracker App") + " · Alok's Tracker App", W / 2, 94);
   ctx.globalAlpha = 1; ctx.textAlign = "left";
 
   const cols = [
@@ -1375,7 +1381,7 @@ async function generateBeforeAfter(aId, bId) {
   ctx.beginPath(); ctx.moveTo(W / 2, headerH + pad); ctx.lineTo(W / 2, headerH + pad + colH); ctx.stroke();
 
   ctx.fillStyle = "#5c6f6a"; ctx.font = "500 16px sans-serif"; ctx.textAlign = "center";
-  ctx.fillText("Generated with FitTrack — private progress tracker", W / 2, H - 18);
+  ctx.fillText("Generated with Alok's Tracker App — private progress tracker", W / 2, H - 18);
   ctx.textAlign = "left";
   return canvas;
 }
@@ -1420,7 +1426,7 @@ async function makeCollage() {
   if (!dateSel || !dateSel.value) { toast("Add at least one photo first"); return; }
   toast("Building collage…");
   const canvas = await generateCollage(dateSel.value);
-  showExportModal(canvas, `fittrack-collage-${dateSel.value}.png`, "Progress Collage");
+  showExportModal(canvas, `alokstracker-collage-${dateSel.value}.png`, "Progress Collage");
 }
 async function makeBeforeAfter() {
   const aSel = document.getElementById("cmpA"), bSel = document.getElementById("cmpB");
@@ -1428,7 +1434,7 @@ async function makeBeforeAfter() {
   if (aSel.value === bSel.value) { toast("Pick two different photos"); return; }
   toast("Building before & after…");
   const canvas = await generateBeforeAfter(aSel.value, bSel.value);
-  showExportModal(canvas, `fittrack-before-after-${todayISO()}.png`, "Before & After");
+  showExportModal(canvas, `alokstracker-before-after-${todayISO()}.png`, "Before & After");
 }
 
 function renderSummaryTab() {
@@ -1570,7 +1576,7 @@ function renderSettings() {
     <div class="card">
       <div class="eyebrow">App</div>
       <button class="btn full" id="installBtn" style="display:none">${icon("phone", 16)} Install App</button>
-      <div class="muted small">Installing adds FitTrack to your home screen and lets it run offline.</div>
+      <div class="muted small">Installing adds Alok's Tracker App to your home screen and lets it run offline.</div>
     </div>
 
     <div class="card">
@@ -1631,7 +1637,7 @@ async function exportData() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `fittrack-backup-${todayISO()}.json`;
+  a.href = url; a.download = `alokstracker-backup-${todayISO()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   toast("Backup downloaded");

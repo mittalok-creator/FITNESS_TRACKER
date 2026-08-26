@@ -1,6 +1,6 @@
 {
-  "name": "FitTrack — Fitness, Diet & Photo Tracker",
-  "short_name": "FitTrack",
+  "name": "Alok's Tracker App — Fitness, Diet & Photo Tracker",
+  "short_name": "Alok's Tracker",
   "description": "Private workout, diet, weight, body-measurement and progress-photo tracker.",
   "start_url": "./index.html",
   "scope": "./",
