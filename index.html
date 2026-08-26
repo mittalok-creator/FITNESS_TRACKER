@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0d9488" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0b1412" media="(prefers-color-scheme: dark)" />
+<meta name="description" content="FitTrack — private fitness, diet & progress-photo tracker" />
+<title>FitTrack</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10v4"/><path d="M22 10v4"/><rect x="5" y="8" width="3" height="8" rx="1"/><rect x="16" y="8" width="3" height="8" rx="1"/><path d="M8 12h8"/></svg>
+      <span>FitTrack</span>
+    </div>
+    <div class="topbar-date" id="todayDate"></div>
+  </header>
+
+  <main id="views">
+    <section id="view-home" class="view active" aria-label="Home"></section>
+    <section id="view-workout" class="view" aria-label="Workout"></section>
+    <section id="view-diet" class="view" aria-label="Diet"></section>
+    <section id="view-progress" class="view" aria-label="Progress"></section>
+    <section id="view-settings" class="view" aria-label="Settings"></section>
+  </main>
+
+  <nav class="bottomnav" aria-label="Primary">
+    <button class="navbtn active" data-view="home" aria-label="Home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h5v-5h2v5h5v-9"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="navbtn" data-view="workout" aria-label="Workout">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10v4"/><path d="M22 10v4"/><rect x="5" y="8" width="3" height="8" rx="1"/><rect x="16" y="8" width="3" height="8" rx="1"/><path d="M8 12h8"/></svg>
+      <span>Workout</span>
+    </button>
+    <button class="navbtn" data-view="diet" aria-label="Diet">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v7a2 2 0 0 0 2 2v11"/><path d="M6 2v5M9 2v5"/><path d="M17 2c-1.4 0-2.3 2-2.3 4.3S15.6 10 17 10v12"/></svg>
+      <span>Diet</span>
+    </button>
+    <button class="navbtn" data-view="progress" aria-label="Progress">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M4 17l5-6 4 3 6-8"/></svg>
+      <span>Progress</span>
+    </button>
+    <button class="navbtn" data-view="settings" aria-label="Settings">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="modalRoot"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="db.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
