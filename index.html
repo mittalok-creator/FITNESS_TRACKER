@@ -1029,9 +1029,16 @@ function quoteForToday() {
 
 /* ===================== Sheets (modals) ===================== */
 function openSheet(html) {
-  $('#layer').innerHTML = `<div class="overlay" data-act="closeSheet"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
-  $('.sheet').addEventListener('click', e => e.stopPropagation());
-  $('.sheet').addEventListener('click', e => { const a = e.target.closest('[data-act]'); if (a) handle(a, e); });
+  $('#layer').innerHTML = `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
+  const overlay = $('.overlay'), sheet = $('.sheet');
+  // Track where the gesture STARTED (capture phase, before the on-screen keyboard can
+  // shift the sheet's layout) rather than where the click ends up — on mobile, tapping
+  // an input opens the keyboard and can resize the sheet mid-tap, landing the click on
+  // the backdrop even though the user meant to tap inside the sheet.
+  let downInSheet = false;
+  overlay.addEventListener('pointerdown', e => { downInSheet = !!e.target.closest('.sheet'); }, true);
+  sheet.addEventListener('click', e => { e.stopPropagation(); const a = e.target.closest('[data-act]'); if (a) handle(a, e); });
+  overlay.addEventListener('click', () => { if (!downInSheet) closeSheet(); });
 }
 const closeSheet = () => { $('#layer').innerHTML = ''; };
 
@@ -1057,6 +1064,9 @@ function settingsSheet() {
     <label class="field">Anthropic API key (only needed outside Claude)<input id="s-key" type="password" value="${esc(s.apiKey)}" placeholder="sk-ant-…" autocomplete="off"></label>
     <div class="small muted">Stored only on this device. For the live PWA we will route AI calls through a secure server function instead.</div>
     <button class="btn block" data-act="saveSettings">Save settings</button>
+    <h3 style="margin-top:10px">App</h3>
+    <button class="btn sm ghost" data-act="refreshApp">Check for updates</button>
+    <div class="small muted" style="margin-top:-4px">Clears the cached version and reloads the latest release.</div>
     <h3 style="margin-top:10px">Backup</h3>
     <div class="row" style="flex-wrap:wrap">
       <button class="btn sm ghost" data-act="exportData">Export all data</button>
@@ -1219,6 +1229,14 @@ const ACT = {
     const g = id => $('#' + id).value;
     S.settings = { ...S.settings, name:g('s-name'), sex:g('s-sex'), age:g('s-age'), height:g('s-height'), goal:g('s-goal'), unit:g('s-unit'), kcal:+g('s-kcal') || 2000, protein:+g('s-protein') || 0, apiKey:g('s-key').trim(), theme:g('s-theme'), stepGoal:+g('s-steps') || 10000, programStart:g('s-pstart') };
     await save('settings'); applyTheme(); closeSheet(); render(); toast('Settings saved');
+  },
+  refreshApp: async () => {
+    toast('Checking for the latest version…', 1800);
+    try {
+      if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+      if ('serviceWorker' in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); }
+    } catch (e) {}
+    location.reload();
   },
   exportData: async () => {
     const data = {}; for (const k of await DB.keys()) data[k] = await DB.get(k);
