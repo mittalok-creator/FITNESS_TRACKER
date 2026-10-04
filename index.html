@@ -6,6 +6,12 @@
 <meta name="theme-color" content="#F1F2EF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12161B" media="(prefers-color-scheme: dark)">
 <title>Tape — Alok's fitness journal</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tape">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
@@ -209,7 +215,7 @@ h3{font-size:1rem}
 /* nav */
 .nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
   padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:20}
-.nav-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+.nav-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 .nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.72rem;font-weight:650;color:var(--muted);padding:6px 0;position:relative}
 .nav button svg{width:22px;height:22px}
 .nav button[aria-current="page"]{color:var(--ink)}
@@ -263,7 +269,6 @@ const ICON = {
   body:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 8v3M11 8v4M15 8v3M19 8v2"/></svg>',
   photos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>',
   plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
-  spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 4 14h6l-1 7 9-11h-6l1-7Z"/></svg>',
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>',
@@ -468,7 +473,7 @@ function lastKg(name, beforeKey) {
 
 /* ===================== UI state & shell ===================== */
 const V = { tab:'today', foodDate:todayKey(), range:30, planDay:null, photoWeek:weekKey(todayKey()), pose:'front', cmpA:null, cmpB:null, draftImg:null, busy:false };
-const TABS = [['today','Today'],['food','Food'],['body','Body'],['photos','Photos'],['plan','Plan'],['spark','Spark']];
+const TABS = [['today','Today'],['food','Food'],['body','Body'],['photos','Photos'],['plan','Plan']];
 const POSES = [['front','Front'],['side','Side'],['back','Back'],['dressed','Dressed front'],['dressedside','Dressed side']];
 const SITES = [['abdomen','Abdomen'],['chest','Chest'],['waist','Waist'],['hips','Hips'],['armL','Arm, left'],['armR','Arm, right'],['thighL','Thigh, left'],['thighR','Thigh, right'],['calf','Calf']];
 
@@ -485,7 +490,7 @@ function header(title) {
 }
 async function render() {
   renderNav();
-  const fn = { today:renderToday, food:renderFood, body:renderBody, photos:renderPhotos, plan:renderPlan, spark:renderSpark }[V.tab];
+  const fn = { today:renderToday, food:renderFood, body:renderBody, photos:renderPhotos, plan:renderPlan }[V.tab];
   await fn();
 }
 
@@ -566,6 +571,12 @@ async function renderToday() {
   <div class="tape" id="tape"></div>
   <input id="wnote" class="note-in" value="${esc(S.wnotes[t] || '')}" placeholder="How do you feel today? (optional)" aria-label="Note or mood">
   <div style="margin-top:12px"><button class="btn block" data-act="logWeight">${logged != null ? 'Update today\'s weight' : 'Log weight'}</button></div>
+
+  <section class="sec flat">
+    <h2 style="font-size:1.2rem;line-height:1.32">"${esc(quoteForToday())}"</h2>
+    <textarea id="spark-note" class="note-in" style="min-height:70px;resize:vertical;margin-top:14px" placeholder="Today's why — one line is enough.">${esc(S.motivation[t] || '')}</textarea>
+    <button class="btn sm ghost" style="margin-top:8px" data-act="saveSpark">Save</button>
+  </section>
 
   <section class="sec flat">
     <div class="sec-head"><h2>Steps</h2><span class="muted small">Goal ${intl(stepGoalFor(t))}${S.steps[t] != null ? '' : ''}</span></div>
@@ -991,7 +1002,7 @@ async function renderPlan() {
   }));
 }
 
-/* ===================== SPARK (daily motivation) ===================== */
+/* ===================== Daily motivation (shown on Today) ===================== */
 const SPARKS = [
   "Discipline is the shortest path between where you are and where you said you'd be.",
   "The tape doesn't lie, and neither does showing up.",
@@ -1014,42 +1025,6 @@ function quoteForToday() {
   const k = todayKey();
   let h = 0; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
   return SPARKS[h % SPARKS.length];
-}
-function spark7Completion() {
-  let done = 0, total = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(todayKey(), -i), day = planDay(d);
-    if (!day || day.rest) continue;
-    const dc = doneCount(d); done += dc.done; total += dc.total;
-  }
-  return total ? Math.round(done / total * 100) : null;
-}
-async function renderSpark() {
-  const t = todayKey(), all = sortedWeights(), first = all[0], lw = lastWeight();
-  const streak = weightStreak(), daysTracked = all.length, completion = spark7Completion();
-  const note = S.motivation[t] || '';
-
-  $('#app').innerHTML = `${header('Spark')}
-  <section class="sec" style="margin-top:4px">
-    <h2 style="font-size:1.55rem;line-height:1.32">"${esc(quoteForToday())}"</h2>
-  </section>
-
-  <section class="sec flat">
-    <div class="sec-head"><h2>Your story so far</h2></div>
-    <div class="statgrid">
-      <div class="stat"><div class="lab">Day streak</div><div class="val">${streak || '–'}</div></div>
-      <div class="stat"><div class="lab">Days tracked</div><div class="val">${daysTracked || '–'}</div></div>
-      <div class="stat"><div class="lab">Weight change</div><div class="val ${first&&lw&&lw[1]-first[1]<=0?'good':'bad'}">${first && lw ? sign(lw[1]-first[1]) : '–'}</div></div>
-      <div class="stat"><div class="lab">This week done</div><div class="val">${completion != null ? completion+'%' : '–'}</div></div>
-    </div>
-    ${daysTracked ? '' : `<p class="small muted" style="margin-top:12px">Log your first weigh-in on Today and your story starts here.</p>`}
-  </section>
-
-  <section class="sec flat">
-    <div class="sec-head"><h2>Today's why</h2></div>
-    <textarea id="spark-note" class="note-in" style="min-height:90px;resize:vertical;margin-top:0" placeholder="Why does today matter? One line is enough.">${esc(note)}</textarea>
-    <button class="btn block" style="margin-top:10px" data-act="saveSpark">Save</button>
-  </section>`;
 }
 
 /* ===================== Sheets (modals) ===================== */
@@ -1303,6 +1278,9 @@ async function loadAll() {
   applyTheme();
 }
 (async () => { await DB.init(); await loadAll(); render(); })();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
 </script>
 </body>
 </html>
